@@ -31,7 +31,7 @@ var (
 // Transport implements the http.Transport interface
 type Transport struct {
 	upstream http.RoundTripper
-	cookies  http.CookieJar
+	Cookies  http.CookieJar
 }
 
 // NewTransport creates a new Transport object for use in a http.Client initialisation
@@ -58,6 +58,15 @@ func (t Transport) RoundTrip(r *http.Request) (*http.Response, error) {
 
 	// Check if Cloudflare anti-bot is on
 	if resp.StatusCode == 503 && resp.Header.Get("Server") == "cloudflare-nginx" {
+		// Add any cookies that were set during the GET request from
+		// above.
+		cookies := t.Cookies.Cookies(r.URL)
+		for _, v := range resp.Cookies() {
+			cookies = append(cookies, v)
+		}
+		t.Cookies.SetCookies(r.URL, cookies)
+
+		// Solve the challenge.
 		resp, err := t.solveChallenge(resp)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to solve challenge")
@@ -115,7 +124,7 @@ func (t Transport) solveChallenge(resp *http.Response) (*http.Response, error) {
 
 	client := http.Client{
 		Transport: t.upstream,
-		Jar:       t.cookies,
+		Jar:       t.Cookies,
 	}
 
 	resp, err = client.Do(req)
