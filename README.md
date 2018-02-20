@@ -13,12 +13,8 @@ import (
     "github.com/carterjones/go-cloudflare-scraper"
 )
 
-
 func main() {
-	scraper, err := scraper.NewTransport(http.DefaultTransport)
-	if err != nil {
-		log.Fatal(err)
-	}
+	scraper := scraper.NewTransport(http.DefaultTransport)
 
 	c := http.Client{Transport: scraper}
 
