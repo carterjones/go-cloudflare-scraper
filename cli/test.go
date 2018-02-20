@@ -40,10 +40,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	t, err := scraper.NewTransport(http.DefaultTransport)
-	if err != nil {
-		log.Fatal(err)
-	}
+	t := scraper.NewTransport(http.DefaultTransport)
 
 	client := &http.Client{Transport: t}
 	wg := sync.WaitGroup{}

@@ -36,12 +36,17 @@ type Transport struct {
 }
 
 // NewTransport creates a new Transport object for use in a http.Client initialisation
-func NewTransport(upstream http.RoundTripper) (*Transport, error) {
+func NewTransport(upstream http.RoundTripper) *Transport {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create new cookie jar")
+		// As of February 19, 2018, there is no path where this actually returns
+		// an error. Therefore, I'm calling panic() here. If an error ever does
+		// crop up, then we can address it. For now, this is unreachable code.
+		// See this link for more details:
+		// https://github.com/golang/go/blob/d153df8e4b5874692f4948e9c8e10720446058e3/src/net/http/cookiejar/jar.go#L75-L85
+		panic(err)
 	}
-	return &Transport{upstream, jar}, nil
+	return &Transport{upstream, jar}
 }
 
 // RoundTrip implements the RoundTripper interface.
